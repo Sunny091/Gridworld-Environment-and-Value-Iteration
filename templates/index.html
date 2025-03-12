@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>網格地圖開發</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .grid {
+                display: grid;
+                gap: 2px;
+                margin-top: 20px;
+            }
+            .cell {
+                width: 50px;
+                height: 50px;
+                background-color: white;
+                border: 1px solid black;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+            }
+            .start {
+                background-color: green;
+            }
+            .goal {
+                background-color: red;
+            }
+            .obstacle {
+                background-color: gray;
+            }
+            .arrow {
+                font-size: 24px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>網格地圖開發</h1>
+        <label for="size">選擇網格大小 (5-9):</label>
+        <input type="number" id="size" min="5" max="9" value="5" />
+        <button onclick="generateGrid()">生成網格</button>
+
+        <div class="container">
+            <div id="gridContainer" class="grid"></div>
+            <button onclick="evaluateValues()">計算價值評估</button>
+        </div>
+
+        <script>
+            let gridSize = 5;
+            let startSet = false;
+            let goalSet = false;
+            let obstacles = 0;
+            let maxObstacles = 3; // 會根據 n-2 設定
+            let gridData = [];
+
+            function generateGrid() {
+                gridSize = parseInt(document.getElementById("size").value);
+                maxObstacles = gridSize - 2;
+                obstacles = 0;
+                startSet = false;
+                goalSet = false;
+                gridData = Array(gridSize)
+                    .fill()
+                    .map(() => Array(gridSize).fill("empty"));
+
+                const gridContainer = document.getElementById("gridContainer");
+                gridContainer.innerHTML = "";
+                gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+                gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 50px)`;
+
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        let cell = document.createElement("div");
+                        cell.classList.add("cell");
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        cell.onclick = () => cellClicked(i, j, cell);
+                        gridContainer.appendChild(cell);
+                    }
+                }
+            }
+
+            function cellClicked(row, col, cell) {
+                if (
+                    gridData[row][col] === "start" ||
+                    gridData[row][col] === "goal"
+                )
+                    return;
+
+                if (!startSet) {
+                    cell.classList.add("start");
+                    gridData[row][col] = "start";
+                    startSet = true;
+                } else if (!goalSet) {
+                    cell.classList.add("goal");
+                    gridData[row][col] = "goal";
+                    goalSet = true;
+                } else if (obstacles < maxObstacles) {
+                    if (gridData[row][col] === "empty") {
+                        cell.classList.add("obstacle");
+                        gridData[row][col] = "obstacle";
+                        obstacles++;
+                    }
+                }
+            }
+
+            function evaluateValues() {
+                fetch("/evaluate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ grid: gridData, size: gridSize }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        displayValues(data);
+                    });
+            }
+
+            function displayValues(data) {
+                const gridContainer = document.getElementById("gridContainer");
+                gridContainer.innerHTML = "";
+
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        let cell = document.createElement("div");
+                        cell.classList.add("cell");
+                        if (gridData[i][j] === "start")
+                            cell.classList.add("start");
+                        if (gridData[i][j] === "goal")
+                            cell.classList.add("goal");
+                        if (gridData[i][j] === "obstacle")
+                            cell.classList.add("obstacle");
+
+                        if (gridData[i][j] === "empty") {
+                            let arrow = document.createElement("span");
+                            arrow.classList.add("arrow");
+                            arrow.innerHTML = getArrowSymbol(data.policy[i][j]);
+                            cell.appendChild(arrow);
+                        }
+
+                        let valueText = document.createElement("div");
+                        valueText.innerText = data.values[i][j].toFixed(2);
+                        cell.appendChild(valueText);
+
+                        gridContainer.appendChild(cell);
+                    }
+                }
+            }
+
+            function getArrowSymbol(action) {
+                switch (action) {
+                    case "up":
+                        return "↑";
+                    case "down":
+                        return "↓";
+                    case "left":
+                        return "←";
+                    case "right":
+                        return "→";
+                    default:
+                        return "";
+                }
+            }
+        </script>
+    </body>
+</html>
