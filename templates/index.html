@@ -17,7 +17,7 @@
             .grid {
                 display: grid;
                 gap: 2px;
-                margin-top: 20px;
+                margin: 10px;
             }
             .cell {
                 width: 50px;
@@ -27,7 +27,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
+                font-size: 14px;
+                position: relative;
             }
             .start {
                 background-color: green;
@@ -38,8 +39,18 @@
             .obstacle {
                 background-color: gray;
             }
+            .current {
+                background-color: yellow;
+            }
             .arrow {
-                font-size: 24px;
+                font-size: 20px;
+                position: absolute;
+                top: 5px;
+                left: 5px;
+            }
+            .grid-container {
+                display: flex;
+                justify-content: space-around;
             }
         </style>
     </head>
@@ -54,23 +65,34 @@
             <button onclick="evaluateValues()">計算價值評估</button>
         </div>
 
+        <div class="grid-container">
+            <div>
+                <h2>路徑動畫</h2>
+                <div id="pathGrid" class="grid"></div>
+            </div>
+            <div>
+                <h2>策略箭頭</h2>
+                <div id="policyGrid" class="grid"></div>
+            </div>
+            <div>
+                <h2>Value (V)</h2>
+                <div id="valueGrid" class="grid"></div>
+            </div>
+        </div>
+
         <script>
             let gridSize = 5;
-            let startSet = false;
-            let goalSet = false;
-            let obstacles = 0;
-            let maxObstacles = 3; // 會根據 n-2 設定
             let gridData = [];
+            let obstacleCount = 0;
+            let maxObstacles = 3;
 
             function generateGrid() {
                 gridSize = parseInt(document.getElementById("size").value);
                 maxObstacles = gridSize - 2;
-                obstacles = 0;
-                startSet = false;
-                goalSet = false;
-                gridData = Array(gridSize)
-                    .fill()
-                    .map(() => Array(gridSize).fill("empty"));
+                obstacleCount = 0;
+                gridData = Array.from({ length: gridSize }, () =>
+                    Array(gridSize).fill("empty")
+                );
 
                 const gridContainer = document.getElementById("gridContainer");
                 gridContainer.innerHTML = "";
@@ -90,25 +112,17 @@
             }
 
             function cellClicked(row, col, cell) {
-                if (
-                    gridData[row][col] === "start" ||
-                    gridData[row][col] === "goal"
-                )
-                    return;
-
-                if (!startSet) {
-                    cell.classList.add("start");
-                    gridData[row][col] = "start";
-                    startSet = true;
-                } else if (!goalSet) {
-                    cell.classList.add("goal");
-                    gridData[row][col] = "goal";
-                    goalSet = true;
-                } else if (obstacles < maxObstacles) {
-                    if (gridData[row][col] === "empty") {
+                if (gridData[row][col] === "empty") {
+                    if (!gridData.flat().includes("start")) {
+                        cell.classList.add("start");
+                        gridData[row][col] = "start";
+                    } else if (!gridData.flat().includes("goal")) {
+                        cell.classList.add("goal");
+                        gridData[row][col] = "goal";
+                    } else if (obstacleCount < maxObstacles) {
                         cell.classList.add("obstacle");
                         gridData[row][col] = "obstacle";
-                        obstacles++;
+                        obstacleCount++;
                     }
                 }
             }
@@ -121,13 +135,16 @@
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        displayValues(data);
+                        drawGrid("policyGrid", data.policy);
+                        drawGrid("valueGrid", data.values, true);
+                        animatePath(data.path);
                     });
             }
 
-            function displayValues(data) {
-                const gridContainer = document.getElementById("gridContainer");
+            function drawGrid(gridId, data, isValue = false) {
+                const gridContainer = document.getElementById(gridId);
                 gridContainer.innerHTML = "";
+                gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
 
                 for (let i = 0; i < gridSize; i++) {
                     for (let j = 0; j < gridSize; j++) {
@@ -141,34 +158,42 @@
                             cell.classList.add("obstacle");
 
                         if (gridData[i][j] === "empty") {
-                            let arrow = document.createElement("span");
-                            arrow.classList.add("arrow");
-                            arrow.innerHTML = getArrowSymbol(data.policy[i][j]);
-                            cell.appendChild(arrow);
+                            let text = document.createElement("div");
+                            text.innerText = isValue
+                                ? data[i][j].toFixed(2)
+                                : getArrowSymbol(data[i][j]);
+                            cell.appendChild(text);
                         }
-
-                        let valueText = document.createElement("div");
-                        valueText.innerText = data.values[i][j].toFixed(2);
-                        cell.appendChild(valueText);
-
                         gridContainer.appendChild(cell);
                     }
                 }
             }
 
+            function animatePath(path) {
+                let step = 0;
+                const pathGrid = document.getElementById("pathGrid");
+                pathGrid.innerHTML = "";
+                pathGrid.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+
+                let interval = setInterval(() => {
+                    if (step >= path.length) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    drawGrid("pathGrid", gridData);
+                    let [row, col] = path[step];
+                    let cell = document.querySelector(
+                        `#pathGrid .cell:nth-child(${row * gridSize + col + 1})`
+                    );
+                    cell.classList.add("current");
+                    step++;
+                }, 500);
+            }
+
             function getArrowSymbol(action) {
-                switch (action) {
-                    case "up":
-                        return "↑";
-                    case "down":
-                        return "↓";
-                    case "left":
-                        return "←";
-                    case "right":
-                        return "→";
-                    default:
-                        return "";
-                }
+                return (
+                    { up: "↑", down: "↓", left: "←", right: "→" }[action] || ""
+                );
             }
         </script>
     </body>

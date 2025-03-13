@@ -1,72 +1,95 @@
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-import random
 
 app = Flask(__name__)
 
-grids = {}
-n = 5  # Default grid size
-
-actions = {'U': (-1, 0), 'D': (1, 0), 'L': (0, -1), 'R': (0, 1)}
-arrow_map = {'U': '↑', 'D': '↓', 'L': '←', 'R': '→'}
+ACTIONS = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+ACTION_LIST = list(ACTIONS.keys())
 
 
-def generate_random_policy(n):
-    return [[random.choice(list(actions.keys())) for _ in range(n)] for _ in range(n)]
+def value_iteration(grid, size, gamma=0.9, theta=1e-4):
+    V = np.zeros((size, size))
+    policy = np.full((size, size), " ", dtype='<U5')
 
+    start, goal = None, None
+    for i in range(size):
+        for j in range(size):
+            if grid[i][j] == "start":
+                start = (i, j)
+            elif grid[i][j] == "goal":
+                goal = (i, j)
 
-def policy_evaluation(policy, n, gamma=0.9, theta=0.01):
-    V = np.zeros((n, n))
+    if not start or not goal:
+        return None, None, None
+
     while True:
         delta = 0
-        for i in range(n):
-            for j in range(n):
-                if (i, j) in grids and grids[(i, j)] == 'obstacle':
+        new_V = np.copy(V)
+
+        for i in range(size):
+            for j in range(size):
+                if (i, j) == goal:
                     continue
-                v = V[i, j]
-                action = policy[i][j]
-                ni, nj = i + actions[action][0], j + actions[action][1]
-                if 0 <= ni < n and 0 <= nj < n and (ni, nj) not in grids:
-                    V[i, j] = -1 + gamma * V[ni, nj]
-                else:
-                    V[i, j] = -1 + gamma * V[i, j]
-                delta = max(delta, abs(v - V[i, j]))
+                if grid[i][j] == "obstacle":
+                    V[i, j] = -1
+                    continue
+
+                best_value = float('-inf')
+                best_action = None
+
+                for action in ACTION_LIST:
+                    di, dj = ACTIONS[action]
+                    ni, nj = i + di, j + dj
+
+                    if 0 <= ni < size and 0 <= nj < size and grid[ni][nj] != "obstacle":
+                        reward = -1
+                        new_value = reward + gamma * V[ni, nj]
+
+                        if new_value > best_value:
+                            best_value = new_value
+                            best_action = action
+
+                if best_action:
+                    new_V[i, j] = best_value
+                    policy[i, j] = best_action
+
+                delta = max(delta, abs(V[i, j] - new_V[i, j]))
+
+        V = new_V
         if delta < theta:
             break
-    return V.tolist()
+
+    path = []
+    position = start
+    while position != goal:
+        path.append(position)
+        action = policy[position]
+        if action == " ":
+            break
+        di, dj = ACTIONS[action]
+        position = (position[0] + di, position[1] + dj)
+        if position in path:
+            break
+
+    return V.tolist(), policy.tolist(), path
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', n=n)
+    return render_template('index.html')
 
 
-@app.route('/set_grid', methods=['POST'])
-def set_grid():
-    global grids, n
+@app.route('/evaluate', methods=['POST'])
+def evaluate():
     data = request.json
-    n = data['n']
-    grids = {}  # Reset grid
-    return jsonify({'message': 'Grid size updated'})
+    grid = data["grid"]
+    size = data["size"]
 
+    V, policy, path = value_iteration(grid, size)
+    if V is None:
+        return jsonify({"error": "請確保起點和終點都已設定"})
 
-@app.route('/update_grid', methods=['POST'])
-def update_grid():
-    global grids
-    data = request.json
-    x, y, cell_type = data['x'], data['y'], data['type']
-    if cell_type == 'clear':
-        grids.pop((x, y), None)
-    else:
-        grids[(x, y)] = cell_type
-    return jsonify({'message': 'Grid updated'})
-
-
-@app.route('/generate_policy', methods=['GET'])
-def generate_policy():
-    policy = generate_random_policy(n)
-    values = policy_evaluation(policy, n)
-    return jsonify({'policy': policy, 'values': values})
+    return jsonify({"values": V, "policy": policy, "path": path})
 
 
 if __name__ == '__main__':
