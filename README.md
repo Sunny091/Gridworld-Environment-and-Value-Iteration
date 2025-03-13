@@ -20,13 +20,15 @@ This Flask web application allows users to:
 
 ## 🛠 **Tech Stack**
 
-| Technology | Description                              |
-| ---------- | ---------------------------------------- |
-| Flask      | Lightweight Python Web Framework         |
-| NumPy      | Computational engine for Value Iteration |
-| HTML / CSS | Frontend UI Design                       |
-| JavaScript | Interactive grid manipulation            |
-| Matplotlib | Visualization of Value & Policy Matrices |
+| Technology                                                                                     | Description                              |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)             | Core programming language                |
+| ![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)                | Lightweight Python web framework         |
+| ![NumPy](https://img.shields.io/badge/-NumPy-013243?logo=numpy&logoColor=white)                | Used for Value Iteration computation     |
+| ![HTML](https://img.shields.io/badge/-HTML5-E34F26?logo=html5&logoColor=white)                 | Webpage structure                        |
+| ![CSS](https://img.shields.io/badge/-CSS3-1572B6?logo=css3&logoColor=white)                    | Styling for the frontend                 |
+| ![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black) | Enables interactive grid manipulation    |
+| ![Matplotlib](https://img.shields.io/badge/-Matplotlib-11557C?logo=plotly&logoColor=white)     | Visualization of Value & Policy matrices |
 
 ---
 
