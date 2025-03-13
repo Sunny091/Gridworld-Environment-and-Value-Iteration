@@ -3,22 +3,37 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>網格地圖開發</title>
+        <title>Grid Map Visualization</title>
         <style>
+            /* General Page Styling */
             body {
-                font-family: Arial, sans-serif;
+                font-family: "Arial", sans-serif;
                 text-align: center;
+                background-color: #f5f5f5;
+                color: #333;
             }
+
+            h1 {
+                color: #2c3e50;
+            }
+
             .container {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                padding: 20px;
             }
+
             .grid {
                 display: grid;
                 gap: 2px;
-                margin: 10px;
+                margin: 20px;
+                border: 2px solid #2c3e50;
+                background-color: #fff;
+                padding: 10px;
+                border-radius: 5px;
             }
+
             .cell {
                 width: 50px;
                 height: 50px;
@@ -28,13 +43,18 @@
                 align-items: center;
                 justify-content: center;
                 font-size: 14px;
+                font-weight: bold;
                 position: relative;
             }
+
+            /* Colors for Different Grid Types */
             .start {
-                background-color: green;
+                background-color: #27ae60;
+                color: white;
             }
             .goal {
-                background-color: red;
+                background-color: #e74c3c;
+                color: white;
             }
             .obstacle {
                 background-color: gray;
@@ -42,41 +62,72 @@
             .current {
                 background-color: yellow;
             }
-            .arrow {
-                font-size: 20px;
-                position: absolute;
-                top: 5px;
-                left: 5px;
+
+            /* Buttons */
+            button {
+                background-color: #3498db;
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                margin: 10px;
+                transition: 0.3s;
             }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+            /* Hidden Sections for Results */
+            .results {
+                display: none; /* Initially Hidden */
+                margin-top: 30px;
+            }
+
             .grid-container {
                 display: flex;
                 justify-content: space-around;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .grid-box {
+                text-align: center;
+                padding: 15px;
+                background: #ecf0f1;
+                border-radius: 10px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             }
         </style>
     </head>
     <body>
-        <h1>網格地圖開發</h1>
-        <label for="size">選擇網格大小 (5-9):</label>
+        <h1>Grid Map Visualization</h1>
+        <label for="size">Choose Grid Size (5-9):</label>
         <input type="number" id="size" min="5" max="9" value="5" />
-        <button onclick="generateGrid()">生成網格</button>
+        <button onclick="generateGrid()">Generate Grid</button>
 
         <div class="container">
             <div id="gridContainer" class="grid"></div>
-            <button onclick="evaluateValues()">計算價值評估</button>
+            <button onclick="evaluateValues()">Compute Value Evaluation</button>
         </div>
 
-        <div class="grid-container">
-            <div>
-                <h2>路徑動畫</h2>
-                <div id="pathGrid" class="grid"></div>
-            </div>
-            <div>
-                <h2>策略箭頭</h2>
-                <div id="policyGrid" class="grid"></div>
-            </div>
-            <div>
-                <h2>Value (V)</h2>
-                <div id="valueGrid" class="grid"></div>
+        <!-- Hidden by Default: Display After Computing -->
+        <div id="resultsSection" class="results">
+            <div class="grid-container">
+                <div class="grid-box">
+                    <h2>Path Animation</h2>
+                    <div id="pathGrid" class="grid"></div>
+                </div>
+                <div class="grid-box">
+                    <h2>Policy Arrows</h2>
+                    <div id="policyGrid" class="grid"></div>
+                </div>
+                <div class="grid-box">
+                    <h2>Value (V)</h2>
+                    <div id="valueGrid" class="grid"></div>
+                </div>
             </div>
         </div>
 
@@ -109,6 +160,10 @@
                         gridContainer.appendChild(cell);
                     }
                 }
+
+                // Hide the results section when regenerating
+                document.getElementById("resultsSection").style.display =
+                    "none";
             }
 
             function cellClicked(row, col, cell) {
@@ -138,6 +193,11 @@
                         drawGrid("policyGrid", data.policy);
                         drawGrid("valueGrid", data.values, true);
                         animatePath(data.path);
+
+                        // Show the results section
+                        document.getElementById(
+                            "resultsSection"
+                        ).style.display = "block";
                     });
             }
 
