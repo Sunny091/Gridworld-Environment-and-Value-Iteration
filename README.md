@@ -18,16 +18,6 @@ This Flask web application allows users to:
 
 ---
 
-## 📷 **Demo**
-
-🎬 **Live Demonstration**
-
-> 👉 Click on the GIF to see it in action
-
-![Flask Web Demo](assets/flask_demo.gif)
-
----
-
 ## 🛠 **Tech Stack**
 
 | Technology | Description                              |
@@ -48,4 +38,16 @@ Ensure you have **Python 3.7+** installed, then run:
 
 ```bash
 pip install flask numpy
+```
+
+### 📌 **2️⃣ Start Flask Server**
+
+```bash
+python app.py
+```
+
+### 📌 **3️⃣ Open in Your Browser**
+
+```cpp
+http://127.0.0.1:5000
 ```
