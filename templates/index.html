@@ -3,130 +3,85 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Grid Map Visualization</title>
-        <style>
-            /* General Page Styling */
-            body {
-                font-family: "Arial", sans-serif;
-                text-align: center;
-                background-color: #f5f5f5;
-                color: #333;
-            }
-
-            h1 {
-                color: #2c3e50;
-            }
-
-            .container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 20px;
-            }
-
-            .grid {
-                display: grid;
-                gap: 2px;
-                margin: 20px;
-                border: 2px solid #2c3e50;
-                background-color: #fff;
-                padding: 10px;
-                border-radius: 5px;
-            }
-
-            .cell {
-                width: 50px;
-                height: 50px;
-                background-color: white;
-                border: 1px solid black;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-                font-weight: bold;
-                position: relative;
-            }
-
-            /* Colors for Different Grid Types */
-            .start {
-                background-color: #27ae60;
-                color: white;
-            }
-            .goal {
-                background-color: #e74c3c;
-                color: white;
-            }
-            .obstacle {
-                background-color: gray;
-            }
-            .current {
-                background-color: yellow;
-            }
-
-            /* Buttons */
-            button {
-                background-color: #3498db;
-                color: white;
-                padding: 10px 15px;
-                border: none;
-                border-radius: 5px;
-                font-size: 16px;
-                cursor: pointer;
-                margin: 10px;
-                transition: 0.3s;
-            }
-
-            button:hover {
-                background-color: #2980b9;
-            }
-
-            /* Hidden Sections for Results */
-            .results {
-                display: none; /* Initially Hidden */
-                margin-top: 30px;
-            }
-
-            .grid-container {
-                display: flex;
-                justify-content: space-around;
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .grid-box {
-                text-align: center;
-                padding: 15px;
-                background: #ecf0f1;
-                border-radius: 10px;
-                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-            }
-        </style>
+        <title>Gridworld Visualization</title>
+        <!-- Flask 正確載入 CSS -->
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='styles.css') }}"
+        />
     </head>
     <body>
-        <h1>Grid Map Visualization</h1>
-        <label for="size">Choose Grid Size (5-9):</label>
-        <input type="number" id="size" min="5" max="9" value="5" />
-        <button onclick="generateGrid()">Generate Grid</button>
+        <!-- Title Section -->
+        <div class="header">Gridworld Visualization</div>
 
-        <div class="container">
-            <div id="gridContainer" class="grid"></div>
-            <button onclick="evaluateValues()">Compute Value Evaluation</button>
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button onclick="switchSection('introduction')">
+                Introduction
+            </button>
+            <button onclick="switchSection('demo')">Demo</button>
         </div>
 
-        <!-- Hidden by Default: Display After Computing -->
-        <div id="resultsSection" class="results">
-            <div class="grid-container">
-                <div class="grid-box">
-                    <h2>Path Animation</h2>
-                    <div id="pathGrid" class="grid"></div>
-                </div>
-                <div class="grid-box">
-                    <h2>Policy Arrows</h2>
-                    <div id="policyGrid" class="grid"></div>
-                </div>
-                <div class="grid-box">
-                    <h2>Value (V)</h2>
-                    <div id="valueGrid" class="grid"></div>
+        <!-- Introduction Page -->
+        <div id="introduction" class="section active">
+            <div class="intro-content">
+                <h2>🔍 Introduction to Gridworld & Value Iteration</h2>
+                <p>
+                    The <strong>Gridworld Environment</strong> is a simplified
+                    reinforcement learning environment where an agent navigates
+                    a grid to reach the goal while avoiding obstacles.
+                </p>
+                <p>
+                    <strong>Value Iteration</strong> is an algorithm used in
+                    reinforcement learning to compute the optimal policy by
+                    iteratively updating the value of each state.
+                </p>
+
+                <h3>📌 How to Use the Demo:</h3>
+                <ul>
+                    <li>Choose the grid size (5x5 to 9x9).</li>
+                    <li>
+                        Click on a cell to set the
+                        <strong>start position (🟩)</strong>.
+                    </li>
+                    <li>
+                        Click another cell to set the
+                        <strong>goal position (🟥)</strong>.
+                    </li>
+                    <li>Add up to <strong>n-2 obstacles (⬛)</strong>.</li>
+                    <li>
+                        Click "Compute Value Evaluation" to see the results!
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Demo Page -->
+        <div id="demo" class="section">
+            <h2>🔧 Gridworld Demo</h2>
+
+            <label for="size">Choose Grid Size (5-9):</label>
+            <input type="number" id="size" min="5" max="9" value="5" />
+            <button onclick="generateGrid()">Generate Grid</button>
+
+            <div id="gridContainer" class="grid"></div>
+            <button onclick="evaluateValues()">Compute Value Evaluation</button>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="results">
+                <div class="grid-container">
+                    <div class="grid-box">
+                        <h2>Path Animation</h2>
+                        <div id="pathGrid" class="grid"></div>
+                    </div>
+                    <div class="grid-box">
+                        <h2>Policy Arrows</h2>
+                        <div id="policyGrid" class="grid"></div>
+                    </div>
+                    <div class="grid-box">
+                        <h2>Value (V)</h2>
+                        <div id="valueGrid" class="grid"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,7 +92,15 @@
             let obstacleCount = 0;
             let maxObstacles = 3;
 
+            function switchSection(section) {
+                document
+                    .querySelectorAll(".section")
+                    .forEach((sec) => sec.classList.remove("active"));
+                document.getElementById(section).classList.add("active");
+            }
+
             function generateGrid() {
+                // Get grid size from user input
                 gridSize = parseInt(document.getElementById("size").value);
                 maxObstacles = gridSize - 2;
                 obstacleCount = 0;
@@ -146,7 +109,7 @@
                 );
 
                 const gridContainer = document.getElementById("gridContainer");
-                gridContainer.innerHTML = "";
+                gridContainer.innerHTML = ""; // Clear previous grid
                 gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
                 gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 50px)`;
 
@@ -161,7 +124,7 @@
                     }
                 }
 
-                // Hide the results section when regenerating
+                // Hide results section when regenerating the grid
                 document.getElementById("resultsSection").style.display =
                     "none";
             }
