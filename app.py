@@ -1,24 +1,16 @@
+
 from flask import Flask, render_template, request, jsonify
 import numpy as np
+import random
 
 app = Flask(__name__)
 
-# Define possible movement actions (Up, Down, Left, Right)
 ACTIONS = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
 ACTION_LIST = list(ACTIONS.keys())
 
 
 def value_iteration(grid, size, gamma=0.9, theta=1e-4):
-    """
-    Perform Value Iteration Algorithm to find the optimal policy.
-    :param grid: The grid representation with "start", "goal", "obstacle".
-    :param size: The size of the grid (n x n).
-    :param gamma: Discount factor for future rewards.
-    :param theta: Convergence threshold for value updates.
-    :return: Value matrix V(s), Policy matrix π(s), and the optimal path from start to goal.
-    """
-    V = np.zeros((size, size))  # Initialize Value Function
-    # Initialize policy with empty values
+    V = np.zeros((size, size))
     policy = np.full((size, size), " ", dtype='<U5')
 
     start, goal = None, None
@@ -30,87 +22,102 @@ def value_iteration(grid, size, gamma=0.9, theta=1e-4):
                 goal = (i, j)
 
     if not start or not goal:
-        return None, None, None  # If no start/goal is set, return None
+        return None, None, None
 
-    while True:
+    traces = []
+
+    for iteration in range(50):  # 限制最大迭代次數
         delta = 0
-        new_V = np.copy(V)  # Create a copy of the value function
+        new_V = np.copy(V)
 
         for i in range(size):
             for j in range(size):
-                if (i, j) == goal:  # Goal state has fixed value
+                if (i, j) == goal:
                     continue
-                if grid[i][j] == "obstacle":  # Obstacles remain -1
+                if grid[i][j] == "obstacle":
                     V[i, j] = -1
                     continue
 
                 best_value = float('-inf')
                 best_action = None
 
-                # Iterate over all possible actions (Up, Down, Left, Right)
                 for action in ACTION_LIST:
                     di, dj = ACTIONS[action]
                     ni, nj = i + di, j + dj
 
-                    # Ensure the new position is within bounds and not an obstacle
                     if 0 <= ni < size and 0 <= nj < size and grid[ni][nj] != "obstacle":
-                        reward = -1  # Every move has a small cost
+                        reward = -1
                         new_value = reward + gamma * V[ni, nj]
-
                         if new_value > best_value:
                             best_value = new_value
                             best_action = action
 
                 if best_action:
-                    new_V[i, j] = best_value  # Update value function
-                    policy[i, j] = best_action  # Update policy
+                    new_V[i, j] = best_value
+                    policy[i, j] = best_action
 
-                # Check for convergence
                 delta = max(delta, abs(V[i, j] - new_V[i, j]))
 
         V = new_V
-        if delta < theta:  # Stop if the value function has converged
+        traces.append(generate_trace(
+            policy, grid, start, goal, size, epsilon=0.2))
+
+        if delta < theta:
             break
 
-    # Compute the best path from start to goal
-    path = []
-    position = start
-    while position != goal:
-        path.append(position)
-        action = policy[position]
-        if action == " ":
-            break  # Stop if no valid action is found
-        di, dj = ACTIONS[action]
-        position = (position[0] + di, position[1] + dj)
-        if position in path:
-            break  # Avoid infinite loops
+    return V.tolist(), policy.tolist(), traces
 
-    # Return value function, policy, and computed path
-    return V.tolist(), policy.tolist(), path
+
+def generate_trace(policy, grid, start, goal, size, epsilon=0.2):
+    trace = []
+    pos = start
+    visited = set()
+
+    for _ in range(size * size):
+        trace.append(pos)
+        if pos == goal or pos in visited:
+            break
+        visited.add(pos)
+
+        if random.random() < epsilon:
+            action = random.choice(ACTION_LIST)
+        else:
+            action = policy[pos[0]][pos[1]]
+
+        if action == " ":
+            break
+
+        di, dj = ACTIONS[action]
+        new_pos = (pos[0] + di, pos[1] + dj)
+
+        if 0 <= new_pos[0] < size and 0 <= new_pos[1] < size:
+            if grid[new_pos[0]][new_pos[1]] != "obstacle":
+                pos = new_pos
+            else:
+                break
+        else:
+            break
+
+    return trace
 
 
 @app.route('/')
 def index():
-    """ Render the main webpage """
     return render_template('index.html')
 
 
 @app.route('/evaluate', methods=['POST'])
 def evaluate():
-    """
-    Receive the grid configuration from the frontend, run Value Iteration,
-    and return the computed Value Function and Policy.
-    """
     data = request.json
     grid = data["grid"]
     size = data["size"]
 
-    V, policy, path = value_iteration(grid, size)
+    V, policy, traces = value_iteration(grid, size)
     if V is None:
         return jsonify({"error": "Please ensure start and goal positions are set"})
 
-    return jsonify({"values": V, "policy": policy, "path": path})
+    return jsonify({"values": V, "policy": policy, "traces": traces})
 
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Start the Flask server
+    app.run(debug=True)

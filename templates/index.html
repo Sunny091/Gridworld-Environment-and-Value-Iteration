@@ -4,70 +4,58 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Gridworld Visualization</title>
-        <!-- Flask 正確載入 CSS -->
         <link
             rel="stylesheet"
             href="{{ url_for('static', filename='styles.css') }}"
         />
     </head>
     <body>
-        <!-- Title Section -->
         <div class="header">Gridworld Visualization</div>
-
-        <!-- Navigation Bar -->
         <div class="nav-bar">
-            <button onclick="switchSection('introduction')">
+            <button
+                id="introBtn"
+                class="active-tab"
+                onclick="switchSection('introduction')"
+            >
                 Introduction
             </button>
-            <button onclick="switchSection('demo')">Demo</button>
+            <button id="demoBtn" onclick="switchSection('demo')">Demo</button>
         </div>
-
-        <!-- Introduction Page -->
         <div id="introduction" class="section active">
             <div class="intro-content">
-                <h2>🔍 Introduction to Gridworld & Value Iteration</h2>
+                <h2 id="introTitle" class="active-title">
+                    🔍 Introduction to Gridworld & Value Iteration
+                </h2>
                 <p>
                     The <strong>Gridworld Environment</strong> is a simplified
-                    reinforcement learning environment where an agent navigates
-                    a grid to reach the goal while avoiding obstacles.
+                    RL environment where an agent learns to reach a goal.
                 </p>
                 <p>
-                    <strong>Value Iteration</strong> is an algorithm used in
-                    reinforcement learning to compute the optimal policy by
-                    iteratively updating the value of each state.
+                    <strong>Value Iteration</strong> calculates the best path by
+                    updating state values iteratively.
                 </p>
-
                 <h3>📌 How to Use the Demo:</h3>
                 <ul>
-                    <li>Choose the grid size (5x5 to 9x9).</li>
+                    <li>Choose a grid size (5x5 to 9x9).</li>
                     <li>
-                        Click on a cell to set the
-                        <strong>start position (🟩)</strong>.
+                        Click to place a <strong>Start (🟩)</strong>,
+                        <strong>Goal (🟥)</strong>, and up to
+                        <strong>n-2 Obstacles (⬛)</strong>.
                     </li>
                     <li>
-                        Click another cell to set the
-                        <strong>goal position (🟥)</strong>.
-                    </li>
-                    <li>Add up to <strong>n-2 obstacles (⬛)</strong>.</li>
-                    <li>
-                        Click "Compute Value Evaluation" to see the results!
+                        Click "Compute Value Evaluation" to see how the agent
+                        learns!
                     </li>
                 </ul>
             </div>
         </div>
-
-        <!-- Demo Page -->
         <div id="demo" class="section">
-            <h2>🔧 Gridworld Demo</h2>
-
-            <label for="size">Choose Grid Size (5-9):</label>
+            <h2 id="demoTitle">🔧 Gridworld Demo</h2>
+            <label for="size">Grid Size (5-9):</label>
             <input type="number" id="size" min="5" max="9" value="5" />
             <button onclick="generateGrid()">Generate Grid</button>
-
             <div id="gridContainer" class="grid"></div>
             <button onclick="evaluateValues()">Compute Value Evaluation</button>
-
-            <!-- Results Section -->
             <div id="resultsSection" class="results">
                 <div class="grid-container">
                     <div class="grid-box">
@@ -85,7 +73,6 @@
                 </div>
             </div>
         </div>
-
         <script>
             let gridSize = 5;
             let gridData = [];
@@ -95,12 +82,40 @@
             function switchSection(section) {
                 document
                     .querySelectorAll(".section")
-                    .forEach((sec) => sec.classList.remove("active"));
+                    .forEach((s) => s.classList.remove("active"));
                 document.getElementById(section).classList.add("active");
+
+                document
+                    .getElementById("introBtn")
+                    .classList.remove("active-tab");
+                document
+                    .getElementById("demoBtn")
+                    .classList.remove("active-tab");
+                document
+                    .getElementById("introTitle")
+                    .classList.remove("active-title");
+                document
+                    .getElementById("demoTitle")
+                    .classList.remove("active-title");
+
+                if (section === "introduction") {
+                    document
+                        .getElementById("introBtn")
+                        .classList.add("active-tab");
+                    document
+                        .getElementById("introTitle")
+                        .classList.add("active-title");
+                } else {
+                    document
+                        .getElementById("demoBtn")
+                        .classList.add("active-tab");
+                    document
+                        .getElementById("demoTitle")
+                        .classList.add("active-title");
+                }
             }
 
             function generateGrid() {
-                // Get grid size from user input
                 gridSize = parseInt(document.getElementById("size").value);
                 maxObstacles = gridSize - 2;
                 obstacleCount = 0;
@@ -109,9 +124,8 @@
                 );
 
                 const gridContainer = document.getElementById("gridContainer");
-                gridContainer.innerHTML = ""; // Clear previous grid
+                gridContainer.innerHTML = "";
                 gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
-                gridContainer.style.gridTemplateRows = `repeat(${gridSize}, 50px)`;
 
                 for (let i = 0; i < gridSize; i++) {
                     for (let j = 0; j < gridSize; j++) {
@@ -123,8 +137,6 @@
                         gridContainer.appendChild(cell);
                     }
                 }
-
-                // Hide results section when regenerating the grid
                 document.getElementById("resultsSection").style.display =
                     "none";
             }
@@ -155,9 +167,7 @@
                     .then((data) => {
                         drawGrid("policyGrid", data.policy);
                         drawGrid("valueGrid", data.values, true);
-                        animatePath(data.path);
-
-                        // Show the results section
+                        animateTraces(data.traces);
                         document.getElementById(
                             "resultsSection"
                         ).style.display = "block";
@@ -165,9 +175,9 @@
             }
 
             function drawGrid(gridId, data, isValue = false) {
-                const gridContainer = document.getElementById(gridId);
-                gridContainer.innerHTML = "";
-                gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+                const container = document.getElementById(gridId);
+                container.innerHTML = "";
+                container.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
 
                 for (let i = 0; i < gridSize; i++) {
                     for (let j = 0; j < gridSize; j++) {
@@ -187,30 +197,50 @@
                                 : getArrowSymbol(data[i][j]);
                             cell.appendChild(text);
                         }
-                        gridContainer.appendChild(cell);
+                        container.appendChild(cell);
                     }
                 }
             }
 
-            function animatePath(path) {
-                let step = 0;
+            function animateTraces(traces) {
                 const pathGrid = document.getElementById("pathGrid");
                 pathGrid.innerHTML = "";
                 pathGrid.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
 
-                let interval = setInterval(() => {
-                    if (step >= path.length) {
-                        clearInterval(interval);
-                        return;
-                    }
+                let iteration = 0;
+
+                function showIteration() {
+                    if (iteration >= traces.length) return;
+
                     drawGrid("pathGrid", gridData);
-                    let [row, col] = path[step];
-                    let cell = document.querySelector(
-                        `#pathGrid .cell:nth-child(${row * gridSize + col + 1})`
-                    );
-                    cell.classList.add("current");
-                    step++;
-                }, 500);
+                    const trace = traces[iteration];
+                    let step = 0;
+
+                    const interval = setInterval(() => {
+                        document
+                            .querySelectorAll("#pathGrid .cell")
+                            .forEach((cell) => {
+                                cell.classList.remove("current");
+                            });
+
+                        if (step >= trace.length) {
+                            clearInterval(interval);
+                            iteration++;
+                            setTimeout(showIteration, 400);
+                            return;
+                        }
+
+                        const [row, col] = trace[step];
+                        const index = row * gridSize + col + 1;
+                        const cell = document.querySelector(
+                            `#pathGrid .cell:nth-child(${index})`
+                        );
+                        if (cell) cell.classList.add("current");
+                        step++;
+                    }, 120);
+                }
+
+                showIteration();
             }
 
             function getArrowSymbol(action) {
