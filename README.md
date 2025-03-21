@@ -6,8 +6,6 @@ An interactive web application to visualize how an agent learns optimal policies
 -   🧭 **Policy arrows** (← ↑ ↓ →)
 -   📈 **Value function** V(s)
 
----
-
 ## 📸 Demo Preview
 
 <div align="center">
@@ -49,7 +47,7 @@ An interactive web application to visualize how an agent learns optimal policies
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/gridworld-visualizer.git
+git clone git@github.com:Sunny091/Gridworld-Environment-and-Value-Iteration.git
 cd gridworld-visualizer
 ```
 
