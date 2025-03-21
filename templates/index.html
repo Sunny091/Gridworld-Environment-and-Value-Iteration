@@ -11,19 +11,19 @@
     </head>
     <body>
         <div class="header">Gridworld Visualization</div>
+
+        <!-- Navigation -->
         <div class="nav-bar">
-            <button
-                id="introBtn"
-                class="active-tab"
-                onclick="switchSection('introduction')"
-            >
+            <button id="introBtn" onclick="switchSection('introduction')">
                 Introduction
             </button>
             <button id="demoBtn" onclick="switchSection('demo')">Demo</button>
         </div>
-        <div id="introduction" class="section active">
+
+        <!-- Introduction Section -->
+        <div id="introduction" class="section">
             <div class="intro-content">
-                <h2 id="introTitle" class="active-title">
+                <h2 id="introTitle">
                     🔍 Introduction to Gridworld & Value Iteration
                 </h2>
                 <p>
@@ -49,6 +49,8 @@
                 </ul>
             </div>
         </div>
+
+        <!-- Demo Section -->
         <div id="demo" class="section">
             <h2 id="demoTitle">🔧 Gridworld Demo</h2>
             <label for="size">Grid Size (5-9):</label>
@@ -56,6 +58,7 @@
             <button onclick="generateGrid()">Generate Grid</button>
             <div id="gridContainer" class="grid"></div>
             <button onclick="evaluateValues()">Compute Value Evaluation</button>
+
             <div id="resultsSection" class="results">
                 <div class="grid-container">
                     <div class="grid-box">
@@ -73,6 +76,7 @@
                 </div>
             </div>
         </div>
+
         <script>
             let gridSize = 5;
             let gridData = [];
@@ -82,7 +86,7 @@
             function switchSection(section) {
                 document
                     .querySelectorAll(".section")
-                    .forEach((s) => s.classList.remove("active"));
+                    .forEach((sec) => sec.classList.remove("active"));
                 document.getElementById(section).classList.add("active");
 
                 document
@@ -114,6 +118,11 @@
                         .classList.add("active-title");
                 }
             }
+
+            // Set initial state
+            window.onload = () => {
+                switchSection("introduction");
+            };
 
             function generateGrid() {
                 gridSize = parseInt(document.getElementById("size").value);
