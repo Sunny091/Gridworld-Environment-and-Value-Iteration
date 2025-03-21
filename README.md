@@ -11,9 +11,9 @@ An interactive web application to visualize how an agent learns optimal policies
 ## 📸 Demo Preview
 
 <div align="center">
-  <img src="images/graph_introduction.png" width="30%" alt="Path Animation">
-  <img src="images/graph_InitialDemo.png" width="30%" alt="Policy Arrows">
-  <img src="images/graph_Demo.png" width="30%" alt="Value Iteration">
+  <img src="images/graph_introduction.png" height="180px" style="margin: 0 10px;">
+  <img src="images/graph_InitialDemo.png" height="180px" style="margin: 0 10px;">
+  <img src="images/graph_Demo.png" height="180px" style="margin: 0 10px;">
 </div>
 ---
 
