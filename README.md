@@ -1,55 +1,97 @@
-# 🏗️ Flask Grid Web — Value Iteration & Policy Visualization
+# 🌐 Gridworld Visualization with Value Iteration
 
-🚀 **A Flask-based Web Application for Interactive Grid-Based Value Iteration!**
+An interactive web application to visualize how an agent learns optimal policies in a **Gridworld environment** using **Value Iteration**. This project simulates the learning process step by step and presents:
 
-> This project provides an interactive way to visualize **Markov Decision Process (MDP)** and **Value Iteration** for reinforcement learning enthusiasts.
-
----
-
-## 🎯 **Project Overview**
-
-This Flask web application allows users to:
-
--   Select an `n × n` grid (5 to 9) and configure **Start (🟩) / Goal (🟥) / Obstacles (⬛)**
--   Compute the optimal policy using **Value Iteration** and visualize it as **arrows (→, ↑, ←, ↓)**
--   Display **real-time animation (🟨)** of how the agent navigates from start to goal
-
-💡 **Perfect for: Reinforcement Learning, Machine Learning, and Flask Web Development Enthusiasts.**
+-   🟨 **Animated agent path** per iteration
+-   🧭 **Policy arrows** (← ↑ ↓ →)
+-   📈 **Value function** V(s)
 
 ---
 
-## 🛠 **Tech Stack**
+## 📸 Demo Preview
 
-| Technology                                                                                     | Description                              |
-| ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)             | Core programming language                |
-| ![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)                | Lightweight Python web framework         |
-| ![NumPy](https://img.shields.io/badge/-NumPy-013243?logo=numpy&logoColor=white)                | Used for Value Iteration computation     |
-| ![HTML](https://img.shields.io/badge/-HTML5-E34F26?logo=html5&logoColor=white)                 | Webpage structure                        |
-| ![CSS](https://img.shields.io/badge/-CSS3-1572B6?logo=css3&logoColor=white)                    | Styling for the frontend                 |
-| ![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black) | Enables interactive grid manipulation    |
-| ![Matplotlib](https://img.shields.io/badge/-Matplotlib-11557C?logo=plotly&logoColor=white)     | Visualization of Value & Policy matrices |
+![Gridworld Demo](preview.gif) <!-- Optional image placeholder -->
 
 ---
 
-## 🚀 **Installation & Usage**
+## 🧠 How It Works
 
-### 📌 **1️⃣ Install Dependencies**
+-   You create a grid (5x5 to 9x9)
+-   Define:
+    -   🟩 Start position
+    -   🟥 Goal position
+    -   ⬛ Obstacles (n - 2 max)
+-   Click **"Compute Value Evaluation"**
+-   The system uses **Value Iteration** to:
+    -   Evaluate V(s)
+    -   Extract optimal policy π(s)
+    -   Animate the agent's exploration over iterations
+    -   Show final deterministic optimal path
 
-Ensure you have **Python 3.7+** installed, then run:
+---
+
+## 🧰 Tech Stack
+
+| Layer       | Technologies                             |
+| ----------- | ---------------------------------------- |
+| 🌐 Frontend | `HTML`, `CSS`, `JavaScript`              |
+| 🔥 Backend  | `Python`, `Flask`                        |
+| 🧪 Logic    | `NumPy`, Value Iteration, Custom Trace   |
+| 🎨 UI/UX    | Responsive Layout + Animated Exploration |
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/your-username/gridworld-visualizer.git
+cd gridworld-visualizer
+```
+
+### 2️⃣ Install dependencies
 
 ```bash
 pip install flask numpy
 ```
 
-### 📌 **2️⃣ Start Flask Server**
+### 3️⃣ Run the Flask app
 
 ```bash
 python app.py
 ```
 
-### 📌 **3️⃣ Open in Your Browser**
+Then open your browser at [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-```cpp
-http://127.0.0.1:5000
+---
+
+## 📁 Project Structure
+
 ```
+📦 project/
+├── app.py              # Flask backend + Value Iteration logic
+├── templates/
+│   └── index.html      # Main interactive UI
+├── static/
+│   └── styles.css      # Styling and responsive layout
+└── README.md
+```
+
+---
+
+## 📌 Features
+
+✅ Click-to-create Grid  
+✅ Start / Goal / Obstacle placement  
+✅ Animated path with agent trial-and-error  
+✅ Policy Arrows visualization  
+✅ State Value Table (V)  
+✅ Responsive layout (mobile + desktop)
+
+---
+
+## ✨ Author
+
+Made with ❤️ by [Your Name]  
+Feel free to fork, contribute, and explore reinforcement learning!
