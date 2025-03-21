@@ -65,6 +65,11 @@ def value_iteration(grid, size, gamma=0.9, theta=1e-4):
         if delta < theta:
             break
 
+    # 補上一條 deterministic 最佳路徑
+    optimal_trace = generate_trace(
+        policy, grid, start, goal, size, epsilon=0.0)
+    traces.append(optimal_trace)
+
     return V.tolist(), policy.tolist(), traces
 
 
