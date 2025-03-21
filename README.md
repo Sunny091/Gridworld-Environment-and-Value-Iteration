@@ -13,7 +13,7 @@ An interactive web application to visualize how an agent learns optimal policies
   <img src="images/graph_InitialDemo.png" height="180px" style="margin: 0 10px;">
   <img src="images/graph_Demo.png" height="180px" style="margin: 0 10px;">
 </div>
----
+
 
 ## 🧠 How It Works
 
