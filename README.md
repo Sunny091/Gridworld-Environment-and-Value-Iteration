@@ -94,5 +94,5 @@ Then open your browser at [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## ✨ Author
 
-Made with ❤️ by [Your Name]  
+Made with ❤️ by [CHIH-HSUAN, SHEN]  
 Feel free to fork, contribute, and explore reinforcement learning!
