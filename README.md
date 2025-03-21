@@ -10,8 +10,11 @@ An interactive web application to visualize how an agent learns optimal policies
 
 ## 📸 Demo Preview
 
-![Gridworld Demo](preview.gif) <!-- Optional image placeholder -->
-
+<div align="center">
+  <img src="images/graph_introduction.png" width="30%" alt="Path Animation">
+  <img src="images/graph_InitialDemo.png" width="30%" alt="Policy Arrows">
+  <img src="images/graph_Demo.png" width="30%" alt="Value Iteration">
+</div>
 ---
 
 ## 🧠 How It Works
